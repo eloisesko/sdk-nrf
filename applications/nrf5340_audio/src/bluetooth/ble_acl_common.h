@@ -16,6 +16,9 @@
 #define DEVICE_NAME_PEER_R CONFIG_BLE_DEVICE_NAME_BASE "_H_R"
 #define DEVICE_NAME_PEER_R_LEN (sizeof(DEVICE_NAME_PEER_R) - 1)
 
+#define DEVICE_NAME_GATEWAY "NRF5340_gateway"
+#define DEVICE_NAME_GATEWAY_LEN (sizeof(DEVICE_NAME_GATEWAY) - 1)
+
 /**@brief Set pointer to peer connection in ble_acl_common.c
  *
  * @param conn	Connection to peer

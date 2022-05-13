@@ -24,6 +24,16 @@ K_WORK_DEFINE(start_scan_work, work_scan_start);
 	BT_LE_CONN_PARAM(CONFIG_BLE_ACL_CONN_INTERVAL, CONFIG_BLE_ACL_CONN_INTERVAL,               \
 			 CONFIG_BLE_ACL_SLAVE_LATENCY, CONFIG_BLE_ACL_SUP_TIMEOUT)
 
+#define BT_LE_ADV_FAST_CONN                                                                        \
+	BT_LE_ADV_PARAM(BT_LE_ADV_OPT_CONNECTABLE, BT_GAP_ADV_FAST_INT_MIN_1,                      \
+			BT_GAP_ADV_FAST_INT_MAX_1, NULL)
+
+/* Advertising data */
+static const struct bt_data adv_data[] = {
+	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
+	BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME_GATEWAY, DEVICE_NAME_GATEWAY_LEN),
+};
+
 static struct bt_gatt_exchange_params exchange_params;
 
 /* Connection to the headset device - the other nRF5340 Audio device
@@ -236,6 +246,17 @@ void work_scan_start(struct k_work *item)
 
 	LOG_DBG("Scanning successfully started");
 }
+
+void work_gateway_adv_start(struct k_work *item)
+{
+	int ret = bt_le_adv_start(BT_LE_ADV_FAST_CONN, adv_data, ARRAY_SIZE(adv_data), NULL,
+				      0);
+
+	if (ret) {
+		LOG_ERR("Advertising failed to start (ret %d)", ret);
+	}
+}
+
 
 void ble_acl_gateway_on_connected(struct bt_conn *conn)
 {
