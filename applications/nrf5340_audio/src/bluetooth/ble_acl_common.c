@@ -40,6 +40,7 @@ static struct bt_conn *_p_conn_peer;
 K_WORK_DEFINE(adv_work, work_adv_start);
 #elif (CONFIG_AUDIO_DEV == GATEWAY)
 K_WORK_DEFINE(scan_work, work_scan_start);
+K_WORK_DEFINE(adv_work_gateway, work_gateway_adv_start);
 #endif /* (CONFIG_AUDIO_DEV == HEADSET) */
 
 /**@brief BLE connected handler.
@@ -204,6 +205,7 @@ void ble_acl_common_start(void)
 	k_work_submit(&adv_work);
 #elif (CONFIG_AUDIO_DEV == GATEWAY)
 	k_work_submit(&scan_work);
+	k_work_submit(&adv_work_gateway);
 #endif /* (CONFIG_AUDIO_DEV == HEADSET) */
 }
 

@@ -54,4 +54,6 @@ void ble_acl_gateway_on_connected(struct bt_conn *conn);
  */
 int ble_acl_gateway_mtu_exchange(struct bt_conn *conn);
 
+void work_gateway_adv_start(struct k_work *item);
+
 #endif /* _BLE_ACL_GATEWAY_H_ */
