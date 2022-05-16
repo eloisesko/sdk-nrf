@@ -19,7 +19,7 @@
 #include "ble_acl_common.h"
 #include "sw_codec_select.h"
 #include "ble_hci_vsc.h"
-#include "ble_acl_gateway.h"
+#include "ble_acl_headset.h"
 #include "audio_sync_timer.h"
 
 #include <zephyr/logging/log.h>
@@ -251,7 +251,7 @@ static void iso_rx_cb(struct bt_iso_chan *chan, const struct bt_iso_recv_info *i
 
 static void iso_connected_cb(struct bt_iso_chan *chan)
 {
-	LOG_DBG("ISO Channel %p connected", chan);
+	LOG_ERR("ISO Channel %p connected", chan);
 
 	if (iso_trans_type == TRANS_TYPE_BIS) {
 		k_sem_give(&sem_big_sync);
@@ -279,6 +279,8 @@ static void iso_disconnected_cb(struct bt_iso_chan *chan, uint8_t reason)
 {
 	int ret;
 
+	LOG_ERR("++iso_disconnected_cb");
+
 	atomic_clear(&iso_tx_pool_alloc[iso_chan_to_idx(chan)]);
 
 	if (iso_trans_type == TRANS_TYPE_BIS) {
@@ -297,11 +299,11 @@ static void iso_disconnected_cb(struct bt_iso_chan *chan, uint8_t reason)
 			}
 		}
 	} else if (iso_trans_type == TRANS_TYPE_CIS) {
-#if (CONFIG_AUDIO_DEV == HEADSET)
+#if (CONFIG_AUDIO_DEV == GATEWAY)
 		LOG_DBG("ISO CIS disconnected, reason %d", reason);
 		ret = ble_event_send(BLE_EVT_DISCONNECTED);
 		ERR_CHK_MSG(ret, "Unable to put event BLE_EVT_DISCONNECTED in event queue");
-#elif (CONFIG_AUDIO_DEV == GATEWAY)
+#elif (CONFIG_AUDIO_DEV == HEADSET)
 		for (int i = 0; i < CIS_ISO_CHAN_COUNT; i++) {
 			if (chan == iso_chan_p[i]) {
 				LOG_DBG("ISO CIS %d disconnected, reason %d", i, reason);
@@ -315,7 +317,7 @@ static void iso_disconnected_cb(struct bt_iso_chan *chan, uint8_t reason)
 			ret = ble_event_send(BLE_EVT_DISCONNECTED);
 			ERR_CHK_MSG(ret, "Unable to put event BLE_EVT_DISCONNECTED in event queue");
 		}
-#endif /* (CONFIG_AUDIO_DEV == HEADSET) */
+#endif /* (CONFIG_AUDIO_DEV == GATEWAY) */
 	} else {
 		LOG_ERR("iso_trans_type not supported");
 	}
@@ -667,7 +669,7 @@ static void work_iso_cis_conn(struct k_work *work)
 	ret = k_msgq_get(&kwork_msgq, &work_data, K_NO_WAIT);
 	ERR_CHK(ret);
 
-	ret = ble_acl_gateway_conn_peer_get(work_data.channel, &connect_param.acl);
+	ret = ble_acl_headset_conn_peer_get(work_data.channel, &connect_param.acl);
 	ERR_CHK_MSG(ret, "Connection peer get error");
 	connect_param.iso_chan = iso_chan_p[work_data.channel];
 
@@ -689,10 +691,10 @@ static void work_iso_cis_conn(struct k_work *work)
 	}
 }
 
-#if (CONFIG_AUDIO_DEV == HEADSET) && (CONFIG_TRANSPORT_CIS)
+#if (CONFIG_AUDIO_DEV == GATEWAY) && (CONFIG_TRANSPORT_CIS)
 static int iso_accept(const struct bt_iso_accept_info *info, struct bt_iso_chan **chan)
 {
-	/* Since a CIS headset only will connect to one other device, the
+	/* Since a CIS gateway only will connect to one other device, the
 	 * first channel will always be used
 	 */
 	if (iso_chan_p[0]->iso) {
@@ -707,7 +709,7 @@ static struct bt_iso_server iso_server = {
 	.sec_level = BT_SECURITY_L0,
 	.accept = iso_accept,
 };
-#endif /* (CONFIG_AUDIO_DEV == HEADSET) && (CONFIG_TRANSPORT_CIS) */
+#endif /* (CONFIG_AUDIO_DEV == GATEWAY) && (CONFIG_TRANSPORT_CIS) */
 
 static bool is_iso_buffer_full(uint8_t iso_chan_idx)
 {
@@ -976,8 +978,8 @@ int ble_trans_iso_cis_connect(struct bt_conn *conn)
 	int ret;
 	struct bt_conn *conn_active;
 
-	for (uint8_t i = 0; i < CONFIG_BT_MAX_CONN; i++) {
-		ret = ble_acl_gateway_conn_peer_get(i, &conn_active);
+	for (uint8_t i = 0; i < CONFIG_BT_ISO_MAX_CHAN; i++) {
+		ret = ble_acl_headset_conn_peer_get(i, &conn_active);
 		ERR_CHK_MSG(ret, "Connection peer get error");
 		if (conn == conn_active) {
 			struct worker_data work_data;
@@ -1168,13 +1170,13 @@ int ble_trans_iso_init(enum iso_transport trans_type, enum iso_direction dir,
 	};
 	ble_trans_iso_rx_cb = rx_cb;
 
-#if (CONFIG_AUDIO_DEV == HEADSET) && (CONFIG_TRANSPORT_CIS)
+#if (CONFIG_AUDIO_DEV == GATEWAY) && (CONFIG_TRANSPORT_CIS)
 	ret = bt_iso_server_register(&iso_server);
 	if (ret) {
 		LOG_ERR("Unable to register ISO server");
 		return ret;
 	}
-#endif /* (CONFIG_AUDIO_DEV == HEADSET) && (CONFIG_TRANSPORT_CIS) */
+#endif /* (CONFIG_AUDIO_DEV == GATEWAY) && (CONFIG_TRANSPORT_CIS) */
 
 	if (CONFIG_BLE_ISO_RX_STATS_S != 0) {
 		k_timer_start(&iso_rx_stats_timer, K_SECONDS(0),

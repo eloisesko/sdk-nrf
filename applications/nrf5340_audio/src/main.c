@@ -139,7 +139,7 @@ void main(void)
 {
 	int ret;
 
-	LOG_DBG("nRF5340 APP core started");
+	LOG_INF("nRF5340 APP core started");
 
 	ret = hfclock_config_and_start();
 	ERR_CHK(ret);

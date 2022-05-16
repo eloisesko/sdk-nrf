@@ -15,7 +15,18 @@
             "serverpath": "JLinkGDBServerCLExe",
             "device": "nRF5340_xxAA_APP",
             "serialNumber": "1050121900",
-            "interface": "swd"
+            "interface": "swd",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                        {
+                                "label": "",
+                                "port": 0,
+                                "type": "console"
+                        }
+                ]
+            }
         },
         {
             "name": "Attach Headset",
@@ -28,7 +39,18 @@
             "serverpath": "JLinkGDBServerCLExe",
             "device": "nRF5340_xxAA_APP",
             "serialNumber": "1050121900",
-            "interface": "swd"
+            "interface": "swd",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                        {
+                                "label": "",
+                                "port": 0,
+                                "type": "console"
+                        }
+                ]
+            }
         },
         {
             "name": "Launch Gateway",
@@ -41,7 +63,18 @@
             "serverpath": "JLinkGDBServerCLExe",
             "device": "nRF5340_xxAA_APP",
             "serialNumber": "1050177693",
-            "interface": "swd"
+            "interface": "swd",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                        {
+                                "label": "",
+                                "port": 0,
+                                "type": "console"
+                        }
+                ]
+            }
         },
         {
             "name": "Attach Gateway",
@@ -54,7 +87,18 @@
             "serverpath": "JLinkGDBServerCLExe",
             "device": "nRF5340_xxAA_APP",
             "serialNumber": "1050177693",
-            "interface": "swd"
+            "interface": "swd",
+            "rttConfig": {
+                "enabled": true,
+                "address": "auto",
+                "decoders": [
+                        {
+                                "label": "",
+                                "port": 0,
+                                "type": "console"
+                        }
+                ]
+            }
         }
     ]
 }
