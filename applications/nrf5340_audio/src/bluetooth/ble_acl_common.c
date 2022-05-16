@@ -32,9 +32,9 @@ LOG_MODULE_DECLARE(ble, CONFIG_LOG_BLE_LEVEL);
 static struct bt_conn *_p_conn_peer;
 
 #if (CONFIG_AUDIO_DEV == HEADSET)
-K_WORK_DEFINE(adv_work, work_adv_start);
-#elif (CONFIG_AUDIO_DEV == GATEWAY)
 K_WORK_DEFINE(scan_work, work_scan_start);
+K_WORK_DEFINE(adv_work_headset, work_headset_adv_start);
+#elif (CONFIG_AUDIO_DEV == GATEWAY)
 K_WORK_DEFINE(adv_work_gateway, work_gateway_adv_start);
 #endif /* (CONFIG_AUDIO_DEV == HEADSET) */
 
@@ -61,9 +61,9 @@ static void on_connected_cb(struct bt_conn *conn, uint8_t err)
 							  BLE_HCI_VSC_TX_PWR_Pos3dBm);
 			ERR_CHK(ret);
 		}
-#if (CONFIG_AUDIO_DEV == HEADSET)
+#if (CONFIG_AUDIO_DEV == GATEWAY)
 		ble_acl_headset_on_connected(conn);
-#elif (CONFIG_AUDIO_DEV == GATEWAY)
+#elif (CONFIG_AUDIO_DEV == HEADSET)
 		ble_acl_gateway_on_connected(conn);
 #if (CONFIG_BT_SMP)
 		ret = bt_conn_set_security(conn, BT_SECURITY_L2);
@@ -90,25 +90,25 @@ static void on_disconnected_cb(struct bt_conn *conn, uint8_t reason)
 
 	bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
 	LOG_DBG("ACL disconnected with %s reason: %d", addr, reason);
-#if (CONFIG_AUDIO_DEV == HEADSET)
+#if (CONFIG_AUDIO_DEV == GATEWAY)
 	if (_p_conn_peer == conn) {
 		bt_conn_unref(_p_conn_peer);
 		_p_conn_peer = NULL;
 	} else {
 		LOG_WRN("Unknown peer disconnected");
 	}
-#elif (CONFIG_AUDIO_DEV == GATEWAY)
+#elif (CONFIG_AUDIO_DEV == HEADSET)
 	struct bt_conn *conn_active;
 
-	for (int i = 0; i < CONFIG_BT_MAX_CONN; i++) {
+	for (int i = 0; i < 1; i++) {
 		int ret;
 
-		ret = ble_acl_gateway_conn_peer_get(i, &conn_active);
+		ret = ble_acl_headset_conn_peer_get(i, &conn_active);
 		ERR_CHK_MSG(ret, "Connection peer get error");
 		if (conn_active == conn) {
 			bt_conn_unref(conn_active);
 			conn_active = NULL;
-			ret = ble_acl_gateway_conn_peer_set(i, &conn_active);
+			ret = ble_acl_headset_conn_peer_set(i, &conn_active);
 			ERR_CHK_MSG(ret, "Connection peer set error");
 			LOG_DBG("Headset %d disconnected", i);
 			break;
@@ -159,12 +159,14 @@ static void security_changed_cb(struct bt_conn *conn, bt_security_t level, enum 
 	} else {
 		LOG_DBG("Security changed: level %u", level);
 	}
-#if (CONFIG_AUDIO_DEV == GATEWAY)
+#if (CONFIG_AUDIO_DEV == HEADSET)
 
-	ret = ble_acl_gateway_mtu_exchange(conn);
+	ret = ble_acl_headset_mtu_exchange(conn);
 	if (ret) {
 		LOG_WRN("MTU exchange procedure failed = %d", ret);
 	}
+#elif (CONFIG_AUDIO_DEV == GATEWAY)
+	ble_acl_gateway_service_discover(conn);
 #endif /* (CONFIG_AUDIO_DEV == GATEWAY) */
 }
 #endif /* (CONFIG_BT_SMP) */
@@ -194,9 +196,9 @@ void ble_acl_common_conn_peer_get(struct bt_conn **p_conn)
 void ble_acl_common_start(void)
 {
 #if (CONFIG_AUDIO_DEV == HEADSET)
-	k_work_submit(&adv_work);
-#elif (CONFIG_AUDIO_DEV == GATEWAY)
 	k_work_submit(&scan_work);
+	k_work_submit(&adv_work_headset);
+#elif (CONFIG_AUDIO_DEV == GATEWAY)
 	k_work_submit(&adv_work_gateway);
 #endif /* (CONFIG_AUDIO_DEV == HEADSET) */
 }

@@ -33,7 +33,7 @@
 #include "channel_assignment.h"
 
 #include <logging/log.h>
-LOG_MODULE_REGISTER(streamctrl, CONFIG_LOG_STREAMCTRL_LEVEL);
+LOG_MODULE_REGISTER(streamctrl, 4);
 
 struct ble_iso_data {
 	uint8_t data[CONFIG_BT_ISO_RX_MTU];
@@ -319,12 +319,12 @@ static int m_ble_transport_init(void)
 	if (ret) {
 		return ret;
 	}
-#if (CONFIG_AUDIO_DEV == GATEWAY)
+#if (CONFIG_AUDIO_DEV == HEADSET)
 	ret = ble_trans_iso_cig_create();
 	if (ret) {
 		return ret;
 	}
-#endif /* (CONFIG_AUDIO_DEV == GATEWAY) */
+#endif /* (CONFIG_AUDIO_DEV == HEADESET) */
 #endif /* (CONFIG_TRANSPORT_BIS) */
 	return 0;
 }
