@@ -1,0 +1,60 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Headset",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/dev_headset/build_debug/zephyr/zephyr.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "jlink",
+            "serverpath": "JLinkGDBServerCLExe",
+            "device": "nRF5340_xxAA_APP",
+            "serialNumber": "1050121900",
+            "interface": "swd"
+        },
+        {
+            "name": "Attach Headset",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/dev_headset/build_debug/zephyr/zephyr.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "jlink",
+            "serverpath": "JLinkGDBServerCLExe",
+            "device": "nRF5340_xxAA_APP",
+            "serialNumber": "1050121900",
+            "interface": "swd"
+        },
+        {
+            "name": "Launch Gateway",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/dev_gateway/build_debug/zephyr/zephyr.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "jlink",
+            "serverpath": "JLinkGDBServerCLExe",
+            "device": "nRF5340_xxAA_APP",
+            "serialNumber": "1050177693",
+            "interface": "swd"
+        },
+        {
+            "name": "Attach Gateway",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/dev_gateway/build_debug/zephyr/zephyr.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "jlink",
+            "serverpath": "JLinkGDBServerCLExe",
+            "device": "nRF5340_xxAA_APP",
+            "serialNumber": "1050177693",
+            "interface": "swd"
+        }
+    ]
+}
